@@ -1,0 +1,12 @@
+runtime: go113
+service: memo-api
+
+manual_scaling:
+  instances: 1
+
+handlers:
+  - url: /.*
+    script: auto
+
+env_variables:
+  DATABASE_URL: "root:root@unix(/cloudsql/{PROJECT_ID}:asia-northeast1:memo)/memo"

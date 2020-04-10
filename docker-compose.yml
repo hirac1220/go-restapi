@@ -1,0 +1,53 @@
+version: '3.7'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+    command: npm run dev
+    ports:
+      - "8000:3000"
+    volumes:
+      - "./web:/app"
+    tty: true
+
+  api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    ports:
+      - "18080:8080"
+    volumes:
+      - "./api:/go/src/app"
+    environment:
+      DATABASE_URL: "root:@tcp(db)/db?charset=utf8&parseTime=True"
+    tty: true
+
+  db:
+    image: mysql:latest
+    container_name: db
+    command: >
+      mysqld
+        --character-set-server=utf8
+        --skip-character-set-client-handshake
+    volumes:
+      - ./restore/db:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=db
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - TZ=Asia/Tokyo
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer:4
+    ports:
+      - 28080:8080
+    restart: always
+    depends_on:
+      - db
+
+volumes:
+  mysql-data:
